@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Course {
+  id          String          @id @default(cuid())
+  name        String
+  code        String
+  difficulty  Int
+  weeklyHours Int
+  credits     Int
+  createdAt   DateTime        @default(now())
+  events      AcademicEvent[]
+  sessions    ClassSession[]
+}
+
+model ClassSession {
+  id        String   @id @default(cuid())
+  courseId  String
+  weekday   Int
+  startTime String
+  endTime   String
+  location  String?
+  createdAt DateTime @default(now())
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model AcademicEvent {
+  id             String   @id @default(cuid())
+  title          String
+  type           String
+  dueDate        DateTime
+  estimatedHours Int      @default(2)
+  createdAt      DateTime @default(now())
+  courseId       String?
+  course         Course?  @relation(fields: [courseId], references: [id], onDelete: SetNull)
+}
+
+model StudentProfile {
+  id            String   @id @default(cuid())
+  homeAddress   String
+  homeLatitude  Float
+  homeLongitude Float
+  transportMode String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model GeneratedPlan {
+  id               String              @id @default(cuid())
+  rationale        String
+  routeMode        String
+  addressLabel     String
+  distanceKm       Float?
+  commuteMinutes   Int?
+  weatherSummary   String?
+  createdAt        DateTime            @default(now())
+  items            GeneratedPlanItem[]
+}
+
+model GeneratedPlanItem {
+  id                  String        @id @default(cuid())
+  generatedPlanId     String
+  title               String
+  day                 String
+  dateIso             DateTime
+  hours               Int
+  order               Int
+  type                String
+  courseName          String
+  placeRecommendation String
+  commuteMinutes      Int?
+  weatherLabel        String?
+  priorityScore       Float?
+  plannedTimeLabel    String?
+  classContext        String?
+  note                String?
+  generatedPlan       GeneratedPlan @relation(fields: [generatedPlanId], references: [id], onDelete: Cascade)
+}
